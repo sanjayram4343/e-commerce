@@ -80,86 +80,33 @@ router.get('/list/search/:name', async (req, res) => {
 // fetch store products by advanced filters api
 router.get('/list', async (req, res) => {
   try {
-    let {
-      sortOrder,
-      rating,
-      max,
-      min,
-      category,
-      brand,
-      page = 1,
-      limit = 10
-    } = req.query;
-    sortOrder = JSON.parse(sortOrder);
+    console.log('Product list request received:', req.query);
 
-    const categoryFilter = category ? { category } : {};
-    const basicQuery = getStoreProductsQuery(min, max, rating);
+    // Simple query to get all active products
+    const products = await Product.find({ isActive: true })
+      .populate('brand', 'name')
+      .populate('category', 'name')
+      .limit(20)
+      .sort({ createdAt: -1 });
 
-    const userDoc = await checkAuth(req);
-    const categoryDoc = await Category.findOne({
-      slug: categoryFilter.category,
-      isActive: true
-    });
+    console.log('Products found:', products.length);
 
-    if (categoryDoc) {
-      basicQuery.push({
-        $match: {
-          isActive: true,
-          _id: {
-            $in: Array.from(categoryDoc.products)
-          }
-        }
-      });
-    }
-
-    const brandDoc = await Brand.findOne({
-      slug: brand,
-      isActive: true
-    });
-
-    if (brandDoc) {
-      basicQuery.push({
-        $match: {
-          'brand._id': { $eq: brandDoc._id }
-        }
-      });
-    }
-
-    let products = null;
-    const productsCount = await Product.aggregate(basicQuery);
-    const count = productsCount.length;
-    const size = count > limit ? page - 1 : 0;
-    const currentPage = count > limit ? Number(page) : 1;
-
-    // paginate query
-    const paginateQuery = [
-      { $sort: sortOrder },
-      { $skip: size * limit },
-      { $limit: limit * 1 }
-    ];
-
-    if (userDoc) {
-      const wishListQuery = getStoreProductsWishListQuery(userDoc.id).concat(
-        basicQuery
-      );
-      products = await Product.aggregate(wishListQuery.concat(paginateQuery));
-    } else {
-      products = await Product.aggregate(basicQuery.concat(paginateQuery));
-    }
-
-    res.status(200).json({
-      products,
-      totalPages: Math.ceil(count / limit),
-      currentPage,
-      count
+    // Always return products, even if empty
+    return res.status(200).json({
+      products: products,
+      totalPages: 1,
+      currentPage: 1,
+      count: products.length
     });
   } catch (error) {
-    console.log('error', error);
+    console.log('Error in product list:', error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
   }
 });
+
+
 
 router.get('/list/select', auth, async (req, res) => {
   try {

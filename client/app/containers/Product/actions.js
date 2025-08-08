@@ -534,6 +534,7 @@ const getSortOrder = value => {
       break;
 
     default:
+      sortOrder.created = -1; // Default sort by creation date
       break;
   }
 

@@ -1,10 +1,12 @@
 {
-  "name": "mern-ecommerce",
+  "name": "buyhut-ecommerce",
   "version": "1.0.0",
-  "description": "MERN Ecommerce",
-  "main": "server/index.js",
+  "description": "BuyHut E-commerce Store - Modern Shopping Experience",
+  "main": "buyhut-server.js",
   "scripts": {
-    "dev": "npm-run-all --parallel dev:*",
+    "dev": "node buyhut-server.js",
+    "start": "node buyhut-server.js",
+    "dev:old": "npm-run-all --parallel dev:*",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "postinstall": "npm-run-all --parallel install:*",
@@ -31,6 +33,10 @@
     "url": "https://github.com/mohamedsamara/mern-ecommerce/issues"
   },
   "homepage": "https://github.com/mohamedsamara/mern-ecommerce#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "chalk": "^4.1.2"
+  },
   "devDependencies": {
     "cross-env": "^5.2.1",
     "npm-run-all": "^4.1.5"
